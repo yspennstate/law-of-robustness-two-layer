@@ -16,3 +16,12 @@ use the fixed seed 20260707 and run in well under a minute. Run any of them with
 - `check_sector_throttle.py` — the deep/shallow/mid sector multiplicity throttles.
 
 Requires only NumPy.
+
+## Supplementary note
+
+`supplement.tex` / `supplement.pdf` develop the reduction of the log-free conjecture, in the
+critical band of widths, to the single multiplier estimate stated as a conjecture in Section 9
+of the paper, together with the unconditional structure around it: occupancy, value-mass,
+serving-capacity, and pile-up lemmas; an affine supremum identity; the single-direction case
+settled for every Lipschitz activation; stratified isolation, cap-mass, forced-depth, and
+deep-peel lemmas; and the deterministic slice. The estimate itself remains open.

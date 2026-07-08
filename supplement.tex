@@ -1,0 +1,349 @@
+\documentclass[11pt,reqno]{amsart}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{booktabs}
+\usepackage{microtype}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Sd}{\mathbb{S}^{d-1}}
+\newcommand{\PP}{\mathbb{P}}
+\newcommand{\EE}{\mathbb{E}}
+\newcommand{\eps}{\varepsilon}
+\newcommand{\Lip}{\operatorname{Lip}}
+\newcommand{\relu}{\operatorname{ReLU}}
+\newcommand{\NN}{\mathcal{N}}
+\newcommand{\GG}{\mathcal{G}}
+\newcommand{\AAA}{\mathcal{A}}
+\newcommand{\FF}{\mathcal{F}}
+\newcommand{\inn}[2]{\langle #1,#2\rangle}
+\DeclareMathOperator{\clip}{clip}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\aff}{aff}
+\DeclareMathOperator{\dist}{dist}
+
+
+\title[Toward the log-free law of robustness]{Toward the log-free law of robustness: a reduction to one multiplier estimate}
+\author{Yitzchak Shmalo}
+\address{Einstein Institute of Mathematics, The Hebrew University of Jerusalem, Givat Ram, Jerusalem, Israel}
+\email{yitzchak.shmalo@gmail.com}
+\date{July 8, 2026}
+\subjclass[2020]{Primary 68T07, 68Q32; Secondary 60F10, 60B20, 60B15}
+\keywords{law of robustness, two-layer neural networks, multiplier estimate, Lipschitz interpolation}
+\hypersetup{
+  pdftitle={Toward the log-free law of robustness: a reduction to one multiplier estimate},
+  pdfauthor={Yitzchak Shmalo},
+  pdfkeywords={law of robustness, two-layer neural networks, multiplier estimate}
+}
+
+\begin{document}
+
+\begin{abstract}
+This note accompanies the paper ``A law of robustness for two-layer neural networks with arbitrary weights''. It develops the reduction of the log-free Bubeck--Li--Nagaraj conjecture, in the critical band of widths, to a single multiplier estimate, and proves the unconditional structure surrounding that estimate, including the single-direction case for every Lipschitz activation. The estimate itself remains open.
+\end{abstract}
+
+\maketitle
+
+\section{Setting}\label{sec:setting}
+
+We work with the class of two-layer networks of width $m$ with activation $\psi$ and arbitrary real weights,
+\begin{equation}\label{eq:class}
+\NN_m \;=\;\Bigl\{\,f(x)=\sum_{k=1}^{m}a_k\,\psi(\inn{w_k}{x}+b_k)+\inn{v}{x}+c\;:\;a_k,b_k,c\in\R,\ w_k,v\in\R^d\,\Bigr\}
+\end{equation}
+in the sphere data model (S) of \cite{BLN,paper}: $\mu$ is the uniform probability measure on $\Sd$ with $d\ge3$, the domain is $D=\Sd$, the data $x_1,\dots,x_n$ are i.i.d.\ from $\mu$, and the labels $y_1,\dots,y_n$ are i.i.d.\ uniform on $\{-1,+1\}$, independent of the data --- the pure-noise case $\sigma^2=1$ of \cite{paper}. Unless stated otherwise $\psi=\relu$. Notation, as in \cite{paper}:
+\begin{itemize}
+\item $\inn{\cdot}{\cdot}$ and $\|\cdot\|$ are the Euclidean inner product and norm on $\R^d$; $\mathbb S^{d-1}=\{x:\|x\|=1\}$; $B_R=\{x:\|x\|\le R\}$.
+\item $\Lip_D(f)=\sup_{x\ne x'\in D}|f(x)-f(x')|/\|x-x'\|$ is the Euclidean Lipschitz constant of $f$ on a set $D$.
+\item $\relu(t)=\max(t,0)$.
+\item For a unit vector $u$ and $t\in\R$, $H_{u,t}=\{x:\inn{u}{x}=t\}$ is the hyperplane with unit normal $u$ at signed distance $t$ from the origin.
+\item $\clip(t)=\max(-1,\min(1,t))$ is the projection of $\R$ onto $[-1,1]$; it is $1$-Lipschitz.
+\item $c,C,c_0,c_2,C_0,C',\kappa$ denote positive absolute constants; $c,C$ may change from line to line, while the subscripted constants are fixed once chosen.
+\item Every supremum over a class of networks or of Lipschitz functions that appears below inside an expectation is over a class that is separable in the uniform norm --- the weights range over a finite-dimensional space with continuous dependence, or over a ball of Lipschitz functions --- so it equals the supremum over a fixed countable dense subset and is measurable; we write $\sup$ without further comment.
+\end{itemize}
+
+Two facts from \cite{paper} are used throughout. First, the canonical form (\cite{paper}, Section~2): every ReLU network of width $m$ can be rewritten, so that the two sides agree at every point of $\Sd$, as
+\begin{equation}\label{eq:canon}
+f(x)=\inn{v}{x}+c+\sum_{j=1}^{m_0}\alpha_j\,\relu(\inn{u_j}{x}-t_j),\qquad m_0\le m,
+\end{equation}
+with $\|u_j\|=1$, $\alpha_j\ne0$, $t_j\in[0,1)$, and pairwise distinct kink hyperplanes. Second, the rigidity and value bounds, which we restate for reference.
+
+\begin{lemma}[Rigidity on the sphere (\cite{paper}, Section~3)]\label{lem:rigidity-sphere}
+Let $d\ge3$ and let $f$ be in the canonical form \eqref{eq:canon} on $D=\Sd$, with $L:=\Lip_{\Sd}(f)<\infty$ (Euclidean metric). Then
+\[
+|\alpha_j|\sqrt{1-t_j^2}\;\le\;2L\qquad\text{for every }j.
+\]
+\end{lemma}
+
+\begin{lemma}[Value bound (\cite{paper}, Section~3)]\label{lem:B0}
+Suppose $\eps\le\sigma^2\le1$ and $\frac1n\sum_i(f(x_i)-y_i)^2\le\sigma^2-\eps\le1$, with all $x_i\in D$ and $|y_i|\le1$. If $\Lip_D(f)\le L$ and $\operatorname{diam}(D)\le4$, then $\sup_D|f|\le2+L\operatorname{diam}(D)\le B_0:=2+4L$.
+\end{lemma}
+
+For widths $m\ge c^2n/2$ the log-free conjecture is immediate (the trivial floor; see \cite{paper}), and at $m=1$ it is the width-one theorem of \cite{paper}; elsewhere it remains open. In this note we reduce it, in the critical band of widths, to a single sharply-stated multiplier estimate, and we prove all the surrounding structure with explicit constants. Throughout: model (S), with labels $y_1,\dots,y_n$ i.i.d.\ uniform on $\{\pm1\}$ and independent of the data --- the pure-noise case $\sigma^2=1$; every expectation $\EE_y$ and every probability below is with respect to this law. Width band $m=n/T$ with $4\le T\le\log^Cn$, target Lipschitz level $L^\ast=c_0\eps\sqrt T$, and $\mathrm{Op}:=\lambda_{\max}(\sum_ix_ix_i^\top)$, which satisfies $\mathrm{Op}\le C_1(1+n/d)=:\overline{\mathrm{Op}}$ with probability $1-2e^{-c\min(n,d)}$ (the rows $\sqrt d\,x_i$ are isotropic with absolute sub-Gaussian norm; \cite[Thm.~4.6.1]{Vershynin}). We write $r_k:=(\relu(\inn{u_k}{x_i}-t_k))_{i\le n}$ for a unit's evaluation vector and say $f$ \emph{fits} if $\frac1n\sum_i(f(x_i)-y_i)^2\le1-\eps$.
+
+This note mixes unconditional results with one open problem, so we mark the boundary at the outset. Conjecture~\ref{conj:M} is open, and Theorem~\ref{thm:conditional} assumes it; everything else here --- the fitting, occupancy, value-mass, serving, and pile-up lemmas, the affine identity of Proposition~\ref{prop:affinesup}, the single-pole and single-direction theorems, stratified isolation, cap-mass, forced depth, and deep peel --- is proved outright. The log-free law in the band is therefore \emph{not} established here or in \cite{paper}; it is reduced, in Theorem~\ref{thm:conditional}, to Conjecture~\ref{conj:M}, and should be read as a program resting on the unconditional lemmas. The sections below follow this division.
+
+\section{Unconditional structure}
+
+\begin{lemma}[Fitting identity]\label{lem:fitident}
+If $f$ fits then $\sum_i\bigl[y_if(x_i)-\tfrac12f(x_i)^2\bigr]\ge\tfrac{\eps n}2$; the same holds for $\clip\circ f$ (which also fits, as clipping contracts toward $y_i\in[-1,1]$); and at least $\tfrac{\eps n}2$ indices satisfy $y_if(x_i)\ge\eps/4$.
+\end{lemma}
+\begin{proof}[Proof]
+Expand $\sum(f_i-y_i)^2=\sum f_i^2-2\sum y_if_i+n\le(1-\eps)n$ and rearrange. For the count: with $w_i:=y_if_i$, each summand $w_i-w_i^2/2$ is at most $\tfrac12$, and at most $w_i<\eps/4$ when $w_i<\eps/4$ (as $-w_i^2/2\le0$); so $\tfrac{\eps n}2\le\tfrac12|S|+\tfrac{\eps}4n$ with $S=\{i:w_i\ge\eps/4\}$.
+\end{proof}
+
+\begin{lemma}[Occupancy]\label{lem:occupancy}
+Deterministically, for every $u\in\Sd$ and $t>0$, $N_u(t):=\#\{i:\inn u{x_i}\ge t\}\le\mathrm{Op}/t^2$. This is sharp: for $k\le\sqrt{d/(C\log n)}$, aiming $u$ at the normalized sum of $k$ data points gives $N_u\bigl(\tfrac1{4\sqrt k}\bigr)\ge k$ with high probability.
+\end{lemma}
+\begin{proof}[Proof]
+$N_u(t)\,t^2\le\sum_{i\,\mathrm{counted}}\inn u{x_i}^2\le u^\top\bigl(\sum_ix_ix_i^\top\bigr)u\le\mathrm{Op}$. For sharpness: with high probability all pairwise inner products are at most $C\sqrt{\log n/d}$, so $\|\sum_{j\le k}x_j\|^2\le2k$ and $\inn{\sum_jx_j}{x_l}\ge\tfrac12$ for $d\ge Ck^2\log n$, giving $\inn u{x_l}\ge1/(2\sqrt{2k})\ge1/(4\sqrt k)$.
+\end{proof}
+
+\begin{lemma}[Value mass and the closure of high thresholds]\label{lem:valuemass}
+On the event $\mathrm{Op}\le\overline{\mathrm{Op}}$: $\|r_{u,t}\|_1\le\min\bigl(2\sqrt{n\,\mathrm{Op}},\ \mathrm{Op}/t,\ (1-t)\mathrm{Op}/t^2\bigr)$, and with the rigidity bound $|\alpha_k|\sqrt{1-t_k^2}\le2L$, uniformly in $t_k\in(0,1)$,
+\[
+|\alpha_k|\,\|r_k\|_1\ \le\ 5\,L\,\mathrm{Op}/t_k .
+\]
+Consequently, for every sign vector $y$ simultaneously, $\sum_{k:\,t_k\ge t_\ast}|\alpha_k\inn y{r_k}|\le5mL\,\mathrm{Op}/t_\ast\le\eps n/64$ as soon as $t_\ast\ge320\,L\,\mathrm{Op}/(\eps T)$.
+\end{lemma}
+\begin{proof}[Proof]
+Layer cake: $\|r_{u,t}\|_1=\int_t^1N_u(\tau)\,d\tau$ with $N_u\le\min(n,\mathrm{Op}/\tau^2)$; the three branches follow by integrating (splitting at $\tau_0=\sqrt{\mathrm{Op}/n}$ for the first). For $t\le\tfrac12$: $|\alpha|\le\tfrac4{\sqrt3}L\le2.31L$ and $\|r\|_1\le\mathrm{Op}/t$ give the bound with constant $3$. For $t>\tfrac12$: $|\alpha|\,\|r\|_1\le\frac{2L}{\sqrt{1-t^2}}\cdot\frac{(1-t)\mathrm{Op}}{t^2}=\Bigl[\frac{2\sqrt{1-t}}{t\sqrt{1+t}}\Bigr]\frac{L\,\mathrm{Op}}t$, and the bracketed coefficient equals $2.31$ at $t=\tfrac12$ and decreases on $(\tfrac12,1)$. The closure statement is the sum of $m$ such bounds with $m=n/T$.
+\end{proof}
+
+\begin{lemma}[Serving capacity]\label{lem:serving}
+For every $h>0$ and every unit, $\#\{i:y_i\alpha_k\relu(\inn{u_k}{x_i}-t_k)\ge h\}\le\mathrm{Op}\,(t_k+h/|\alpha_k|)^{-2}\le6\,\mathrm{Op}\,L^2/h^2$, and this is attained up to constants by aimed configurations. Consequently no fitting in which every index of Lemma~\ref{lem:fitident} receives height $\eps/4$ from a single unit is possible at $L=c_0\eps\sqrt T$ with $c_0<\sqrt{\eps/(192\,\overline{\mathrm{Op}})}$: it would force $\tfrac{\eps n}2\le m\cdot6\,\mathrm{Op}\,L^2(4/\eps)^2=96\,c_0^2\,\mathrm{Op}\,n$.
+\end{lemma}
+\begin{proof}[Proof]
+Receiving height $h$ forces $\inn{u_k}{x_i}\ge t_k+h/|\alpha_k|$; apply Lemma~\ref{lem:occupancy}. For $t_k\le\tfrac12$ drop $t_k$ and use $\alpha_k^2\le\tfrac{16}3L^2$; for $t_k>\tfrac12$, serving is possible only if $h\le|\alpha_k|(1-t_k)$, whence $h^2\le4L^2\frac{1-t_k}{1+t_k}\le\tfrac43L^2$, while $N\le\mathrm{Op}/t_k^2\le4\,\mathrm{Op}\le6\,\mathrm{Op}\,L^2/h^2$.
+\end{proof}
+
+\begin{lemma}[Gradient cloud and pile-up]\label{lem:pileup}
+In the ball model, at every point off the kink hyperplanes the gradient is $v+s_{A(x)}$ with $s_A=\sum_{k\in A}\alpha_ku_k$ and $A(x)$ the active set; hence $\|s_A-s_{A'}\|\le2L$ for any two realizable active sets. If moreover a group $G$, disjoint from $B$, has $|\alpha_k|\in[a,A_{\max}]$, pairwise $|\inn{u_j}{u_l}|\le a^2/(2A_{\max}^2|G|)$, and both $B\cup G$ and $B$ are realizable as active sets at points off the kinks, then $\|s_G\|^2\ge a^2|G|/2$ while $\|s_G\|\le2L$, so $|G|\le8L^2/a^2$: at most $8L^2/a^2$ near-orthogonal units of coefficient size $\ge a$ can activate together on top of a common background.
+\end{lemma}
+\begin{proof}[Proof]
+Rademacher differentiability on the open ball plus the explicit affine form on each cell of the kink arrangement; subtract the two gradients. For the group bound, $s_G=s_{B\cup G}-s_B$ and $\|s_G\|^2\ge\sum_G\alpha_k^2-\mu(\sum_G|\alpha_k|)^2\ge a^2|G|-\mu A_{\max}^2|G|^2$ with $\mu$ the coherence bound.
+\end{proof}
+
+We emphasize that the realizability hypothesis in Lemma~\ref{lem:pileup} is genuine, and that its spherical analogue carries an error term $2|x-x'|(\|v\|+\sum_k|\alpha_k|)$ which cannot be controlled when the kink caps of $G$ cluster: pair-realizability and small $|x-x'|$ cannot be secured simultaneously on $\Sd$. This is precisely the boundary of what the present methods prove. On the affine side there is no such obstruction, in a strong quantitative sense:
+
+\begin{proposition}[Affine supremum identity]\label{prop:affinesup}
+Let $A=[X\;\mathbf1]\in\R^{n\times(d+1)}$ and $P$ the orthogonal projection onto its column space. Then
+\[
+\sup_{v\in\R^d,\ c\in\R}\ \Bigl[\sum_iy_i(\inn v{x_i}+c)-\tfrac14\sum_i(\inn v{x_i}+c)^2\Bigr]\ =\ y^\top Py,
+\]
+with $\EE_y\,y^\top Py=\mathrm{rank}(A)\le d+1$ and $\PP\bigl(y^\top Py\ge C(d+\log(1/\delta))\bigr)\le\delta$. In particular the affine sector, with no bound whatsoever on $(v,c)$, cannot carry more than $O(d+\log(1/\delta))$ of the fitting functional --- there is no logarithm in $n$ and no harmonic decomposition involved.
+\end{proposition}
+\begin{proof}[Proof]
+The affine sample vectors are exactly $\mathrm{col}(A)$, and $\sup_{z\in\mathrm{col}(A)}[\inn yz-\|z\|^2/4]=\|Py\|^2$, attained at $z=2Py$. The expectation is $\mathrm{tr}\,P$; the tail is Hanson--Wright \cite[Thm.~6.2.1]{Vershynin} with $\|P\|_F^2=\mathrm{tr}\,P$ and $\|P\|_{\mathrm{op}}=1$.
+\end{proof}
+
+\section{The open estimate and the conditional law}
+
+The one statement we cannot yet prove is the following multiplier estimate for the low-threshold (``mesoscopic'') sector. Write $t_\ast:=\min\bigl(1,\,320\,L^\ast\overline{\mathrm{Op}}/(\eps T)\bigr)$.
+
+\begin{conjecture}[Mesoscopic multiplier estimate (Conjecture~9.1 of \cite{paper})]\label{conj:M}
+There are absolute constants $C,c_0>0$ such that in the band, for $d\ge\eps^{-2}\log^Cn$, with probability at least $1-1/n$ over the data:
+\[
+\EE_y\ \sup\ \sum_{i=1}^ny_i\,\clip\Bigl(\inn v{x_i}+c+\!\!\sum_{k:\,t_k\le t_\ast}\!\!\alpha_k\relu(\inn{u_k}{x_i}-t_k)\Bigr)\ \le\ \frac{\eps n}4,
+\]
+the supremum over all $(v,c,(\alpha_k,u_k,t_k))$ arising as the affine-plus-low-threshold part of a canonical $f$ with $\Lip_{\Sd}(f)\le L^\ast$, $\sup_{\Sd}|f|\le2+2L^\ast$, and rigidity $|\alpha_k|\sqrt{1-t_k^2}\le2L^\ast$.
+\end{conjecture}
+
+Every construction we have tested numerically --- aimed same-sign clusters, stacked caps, profile spikes, adaptive groups --- stays at or below $2mL^\ast\overline{\mathrm{Op}}/t_\ast=\eps n/160$ against this threshold (\texttt{numerics/check\_sector\_throttle.py}); we record this as evidence for Conjecture~\ref{conj:M}, not a proof. Lemma~\ref{lem:serving} closes the single-domination regime unconditionally and Lemma~\ref{lem:pileup} the organized near-orthogonal stacks, so the open content of Conjecture~\ref{conj:M} is the unorganized, clustered regime described above.
+
+\begin{theorem}[Conditional log-free law in the band]\label{thm:conditional}
+Assume Conjecture~\ref{conj:M}. Then, in model (S) with i.i.d.\ uniform $\pm1$ labels independent of the data and $d\ge\eps^{-2}\log^Cn$, for each width $m=n/T$ in the band, with probability at least $1-1/n-2e^{-c\min(n,d)}-e^{-\eps^2n/128}$, no width-$m$ network with arbitrary weights and $\Lip_{\Sd}(f)\le c_0\eps\sqrt{n/m}$ fits $\eps$ below the noise floor.
+\end{theorem}
+\begin{proof}[Proof]
+Suppose $f$ fits with $\Lip_{\Sd}(f)\le L^\ast$. The canonical form and rigidity place $f$ in the band class, and Lemma~\ref{lem:fitident} gives $\sum_iy_i\clip(f(x_i))\ge\eps n/2$ --- deterministically, since $|y_i|=1$. Split $f=a+g_{\mathrm{hi}}+g_{\mathrm{lo}}$ at $t_\ast$. Since clipping is $1$-Lipschitz, $\sum_iy_i\clip(f(x_i))\le\sum_iy_i\clip\bigl((a+g_{\mathrm{lo}})(x_i)\bigr)+\sum_i|g_{\mathrm{hi}}(x_i)|$, and the last sum is at most $\eps n/64$ by Lemma~\ref{lem:valuemass}, deterministically in $y$. The remaining supremum has expectation at most $\eps n/4$ by Conjecture~\ref{conj:M}, and bounded differences $2$ in each $y_i$, so by McDiarmid it is at most $3\eps n/8$ with probability $1-e^{-\eps^2n/128}$. Since $\tfrac38+\tfrac1{64}<\tfrac12$, this contradicts the fitting inequality.
+\end{proof}
+
+Together with the width-one theorem of \cite{paper} ($m=1$), the trivial floor ($m\ge c^2n/2$), and the sample-free logarithm of \cite{paper} (valid for $n\gtrsim md^2\log(md)$), Conjecture~\ref{conj:M} is now the precise remaining obstacle to the log-free law in the band; its own open core is the clustered-kink regime, the same degeneracy that blocks the extension of Lemma~\ref{lem:pileup} to the sphere.
+
+\section{The single-direction case, settled unconditionally}
+
+The single-pole case of that regime --- all kink caps sharing one axis, with no bound on their number --- can be settled completely, and with no logarithm and no restriction on the dimension. The mechanism is a static form of rigidity: for a single-pole network the gradient is constant on each level set of the pole direction, so one well-chosen evaluation replaces the two-point motion argument that fails on the sphere.
+
+\begin{lemma}[Static profile rigidity]\label{lem:staticrig}
+Let $f(x)=\inn vx+c+\sum_{k\le m_0}\alpha_k\relu(\inn{u_0}x-t_k)$ with distinct $t_k\in(-1,1)$, any $m_0$, and $d\ge3$. Write $v=\beta u_0+v_\perp$ with $v_\perp\perp u_0$, and $B(s):=\beta+\sum_{k:\,t_k<s}\alpha_k$. Then for every $s\in(-1,1)\setminus\{t_1,\dots,t_{m_0}\}$,
+\[
+B(s)^2(1-s^2)+\|v_\perp\|^2\ \le\ \Lip_{\Sd}(f)^2 .
+\]
+\end{lemma}
+\begin{proof}[Proof]
+At every $x$ with $\inn{u_0}x=s$ the function is differentiable with ambient gradient $z=B(s)u_0+v_\perp$, constant on the whole level set. Write $x=su_0+\sqrt{1-s^2}\,w$ with $w\perp u_0$ unit; then $\|P_{x^\perp}z\|^2=\|z\|^2-\inn zx^2$ and $\inn zx=B(s)s+\sqrt{1-s^2}\inn{v_\perp}w$. Since $d\ge3$ there is a unit $w\perp u_0$ with $w\perp v_\perp$, and for that choice $\Lip_{\Sd}(f)^2\ge\|P_{x^\perp}z\|^2=B(s)^2(1-s^2)+\|v_\perp\|^2$. (The combined inequality genuinely requires $d\ge3$; this is the static, single-evaluation analogue of Lemma~\ref{lem:rigidity-sphere}.)
+\end{proof}
+
+Two consequences, writing $\tilde P(s):=c+\beta s+\sum_k\alpha_k\relu(s-t_k)$ for the profile, so that $f(x)=\tilde P(\inn{u_0}x)+\inn{v_\perp}x$: the total variation obeys $\mathrm{TV}(\tilde P)=\int_{-1}^1|B|\le L\int_{-1}^1(1-s^2)^{-1/2}\,ds=\pi L$ with $L=\Lip_{\Sd}(f)$, however many units are stacked; and $\|v_\perp\|\le L$.
+
+\begin{theorem}[Single-pole networks cannot fit]\label{thm:singlecluster}
+There are absolute constants $c,C>0$ such that in model (S) with i.i.d.\ uniform $\pm1$ labels independent of the data, for all $d\ge3$ and $\eps^2n\ge C$, with probability at least $1-2e^{-c\min(n,d)}-e^{-\eps^2n/128}$: every network of the form
+\[
+f(x)=\inn vx+c'+\sum_{k\le m_0}\alpha_k\relu(\inn{u_0}x-t_k),\qquad u_0\in\Sd,\ m_0\ \text{arbitrary},
+\]
+with arbitrary weights that fits $\eps$ below the noise floor satisfies
+\[
+\Lip_{\Sd}(f)\ \ge\ c\,\eps\,\min\bigl(\sqrt n,\ d\bigr).
+\]
+\end{theorem}
+\begin{proof}[Proof]
+Suppose $f$ fits with $L:=\Lip_{\Sd}(f)\le c\eps\min(\sqrt n,d)$; we merge units with equal thresholds and absorb any unit with $|t_k|\ge1$ into the affine part (such a unit is affine on $\Sd$, since $\inn{u_0}x\in[-1,1]$), leaving distinct thresholds $t_k\in(-1,1)$ of either sign. All statements below hold on the event $\mathrm{Op}:=\lambda_{\max}(\sum_ix_ix_i^\top)\le C_1(1+n/d)$, of probability $1-2e^{-c\min(n,d)}$.
+
+\emph{Fitting identity.} As in Lemma~\ref{lem:fitident}, fitting forces $\sum_iy_i\,\clip(f(x_i))\ge\eps n/2$, deterministically.
+
+\emph{Tail.} Let $s_0=\tfrac12$ and split $\tilde P=\tilde P_{\le}+\tilde P_>$, where $\tilde P_{\le}(s):=\tilde P(\mathrm{clamp}(s,-s_0,s_0))$. The profile $\tilde P$ is piecewise linear in $s=\inn{u_0}x$ with derivative $B(s)$ off its finitely many kinks, and $|B(s)|\le L/\sqrt{1-s^2}$ at every such $s\in(-1,1)$ by Lemma~\ref{lem:staticrig}, whose thresholds now range over all of $(-1,1)$: a kink on the negative side ($t_k<0$) enters $B(s)$ for $s>t_k$ on the same footing as a positive one, so both tails pay the slope bound. Hence for $|s|>s_0$, $|\tilde P_>(s)|\le\int_{s_0}^{|s|}|B|\le L\int_{s_0}^{|s|}(1-\tau^2)^{-1/2}d\tau$, so by the layer cake and Lemma~\ref{lem:occupancy} applied to $u_0$ and to $-u_0$,
+\[
+\sum_{i:\,|s_i|>s_0}|\tilde P_>(s_i)|\ \le\ 2\,L\,\mathrm{Op}\int_{s_0}^1\frac{d\tau}{\tau^2\sqrt{1-\tau^2}}\ =\ 2\,L\,\mathrm{Op}\,\frac{\sqrt{1-s_0^2}}{s_0}\ =\ 2\sqrt3\,L\,\mathrm{Op}\ \le\ 4L\,\mathrm{Op},
+\]
+deterministically in $y$.
+
+\emph{Ridge multiplier.} Let $\mathcal R$ be the class of functions $x\mapsto Q(\inn ux)$ over all $u\in\Sd$ and all $\Lambda_0$-Lipschitz $Q$ with $|Q|\le B'$, where $\Lambda_0:=2L/\sqrt3$ and $B':=2+3L$ (the profile $\tilde P_\le$ qualifies: its slope is $|B(s)|\le L/\sqrt{1-s_0^2}$ on $[-s_0,s_0]$, and $|\tilde P|\le\sup|f|+\|v_\perp\|\le2+3L$ by Lemma~\ref{lem:B0} with $\operatorname{diam}\Sd=2$). We claim
+\[
+\EE_y\ \sup_{\mathcal R}\ \sum_iy_iQ(\inn u{x_i})\ \le\ C(1+L)\sqrt n .
+\]
+Indeed, in the (unnormalized) empirical metric, $\|Q(\inn u\cdot)-Q'(\inn{u'}\cdot)\|_{\R^n}\le\Lambda_0\|X(u-u')\|+\sqrt n\,\|Q-Q'\|_\infty$, so a product cover suffices, and Dudley's entropy integral \cite[Thm.~8.1.3]{Vershynin} splits. The direction factor is a cover of the image $\{Xu\}\subseteq XB_2^d$, an ellipsoid of rank $\min(n,d)$ and semi-axes $\sigma_j(X)$ with $\sum_j\sigma_j^2=\|X\|_F^2=n$; covering it by a ball of radius $\sqrt{\mathrm{Op}}$ in dimension $\min(n,d)$ and using
+\[
+\mathrm{Op}\cdot\min(n,d)\ \le\ C_1(1+n/d)\min(n,d)\ \le\ 2C_1n
+\]
+(in both regimes $d\le n$ and $d>n$), the direction term of the integral is at most $C\Lambda_0\sqrt{\mathrm{Op}\min(n,d)}\le C'L\sqrt n$. The profile factor is the classical sup-norm entropy of one-dimensional Lipschitz functions, $\log N(u)\le C(\Lambda_0/u+\log(B'/u))$, whose Dudley integral at scale $\sqrt n$ is $C\sqrt n(\sqrt{\Lambda_0B'}+B')\le C(1+L)\sqrt n$. (It is the Lipschitz profile that removes the dimension: sharp thresholds would pay the halfspace capacity $\sqrt{nd}$.)
+
+\emph{Assembly.} Since clipping is $1$-Lipschitz and $f-\tilde P_>(\inn{u_0}\cdot)=\inn{v_\perp}\cdot+\tilde P_\le(\inn{u_0}\cdot)$,
+\[
+\sum_iy_i\clip(f(x_i))\ \le\ \sum_iy_i\clip\bigl(\inn{v_\perp}{x_i}+\tilde P_\le(s_i)\bigr)+\sum_i|\tilde P_>(s_i)| .
+\]
+The contraction principle removes the clip; sup-subadditivity splits the affine part ($\|v_\perp\|\le L$ and $\EE\|\sum_iy_ix_i\|\le\sqrt n$) from the ridge part (the display above):
+\[
+\EE_y\ \sup\ \sum_iy_i\clip(f(x_i))\ \le\ C(1+L)\sqrt n\ +\ 4L\,\mathrm{Op} .
+\]
+With $L\le c\eps\min(\sqrt n,d)$: the first term is at most $\eps n/16+\eps n/16$ (using $\eps^2n\ge C$), and $4L\,\mathrm{Op}\le4c\eps\min(\sqrt n,d)\,C_1(1+n/d)\le8cC_1\eps n\le\eps n/8$ for $c$ small, in both regimes. McDiarmid (bounded differences $2$) lifts the expectation bound to $\sup\le3\eps n/8$ with probability $1-e^{-\eps^2n/128}$, and $\tfrac38<\tfrac12$ contradicts the fitting identity.
+\end{proof}
+
+\begin{remark}
+Theorem~\ref{thm:singlecluster} is free of any logarithm and of any width bound: arbitrarily many stacked, sign-alternating, nested-threshold units along one axis cannot interpolate random labels below Lipschitz constant $c\eps\min(\sqrt n,d)$. At $d\ge n$ the threshold is $c\eps\sqrt n$, the conjectured rate at the overparameterized endpoint. In the language of Conjecture~\ref{conj:M}, this settles the single-cluster case; the general case reduces to two statements about interacting clusters: cross-cluster profile rigidity (the merge phenomenon of Remark~\ref{rem:rigidfail}), and a joint multiplier bound in which the clip must prevent many clusters from being simultaneously large. Numerics: over $2000$ adversarial single-pole networks the rigidity ratio $\max_s|B(s)|\sqrt{1-s^2}/\Lip_{\Sd}(f)$ reaches $1.0000$ and never exceeds it (\texttt{numerics/check\_static\_rigidity.py}), and the free-direction ramp supremum scales as $\sqrt n$ --- decisively below the $\sqrt{nd}$ of sharp thresholds.
+\end{remark}
+
+Nothing in the static mechanism uses the kinks: for a general Lipschitz profile the gradient on a level set is $(\beta+g'(s))u_0+v_\perp$ at every $s$ where $g$ is differentiable, and Lemma~\ref{lem:staticrig} holds verbatim with $B(s)$ replaced by $\beta+g'(s)$, almost everywhere. Since the tail estimate, the ridge multiplier bound (which was stated for arbitrary Lipschitz profiles from the start), the value bound, and the assembly are equally indifferent to the representation, the single-direction theorem holds for \emph{every} activation.
+
+\begin{theorem}[Single-direction networks cannot fit, any activation]\label{thm:singleclusterpsi}
+There are absolute constants $c,C>0$ such that in model (S) with i.i.d.\ uniform $\pm1$ labels independent of the data, for all $d\ge3$ and $\eps^2n\ge C$, with probability at least $1-2e^{-c\min(n,d)}-e^{-\eps^2n/128}$: for \emph{every} Lipschitz activation $\psi$, every network of the form
+\[
+f(x)=\inn vx+c'+\sum_{k\le m_0}a_k\,\psi\bigl(s_k\inn{u_0}x+b_k\bigr),\qquad u_0\in\Sd,\ m_0,\ s_k,\ a_k,\ b_k\ \text{arbitrary},
+\]
+that fits $\eps$ below the noise floor satisfies $\Lip_{\Sd}(f)\ge c\,\eps\,\min(\sqrt n,d)$.
+\end{theorem}
+\begin{proof}[Proof]
+The unit sum is a single Lipschitz function $g(\inn{u_0}x)$ of the pole variable, so $f=\inn vx+c'+g(\inn{u_0}x)$ with $g$ Lipschitz; no canonical form is needed. The value bound $\sup|f|\le2+2L$ uses only the Lipschitz constant, the diameter, and one fitted point, so it is representation-free. Profile-derivative rigidity ($|\beta+g'(s)|\sqrt{1-s^2}\le L$ a.e.\ and $\|v_\perp\|\le L$) follows from the level-set gradient as above. The tail: for a general profile both sides of the split at $s_0=\tfrac12$ pay the slope bound, giving $\sum_i|\tilde P_>(s_i)|\le2\sqrt3\,L\,\mathrm{Op}\le4L\,\mathrm{Op}$ by the occupancy integral applied to $\pm u_0$. The clamped profile is $(2L/\sqrt3)$-Lipschitz and bounded by $2+3L$, so the ridge multiplier bound of Theorem~\ref{thm:singlecluster}'s proof applies as stated; the assembly and McDiarmid step are unchanged.
+\end{proof}
+
+Numerically the transferred rigidity is exactly as tight as the piecewise-linear one: over adversarial single-direction $\tanh$ and GELU stacks the ratio $\max_s|\beta+g'(s)|\sqrt{1-s^2}/\Lip_{\Sd}(f)$ equals $1.0000$ (computed against the exact analytic Lipschitz constant), with no violations, and the $\tanh$ ridge multiplier scales as $\sqrt n$, not $\sqrt{nd}$.
+
+\section{Structure above the coherence floor}
+
+For several interacting pole directions, the static mechanism extends verbatim as long as the thresholds sit above the bulk scale and the poles are pairwise incoherent: a random probe then deactivates every other cluster identically, and rigidity is exact --- with no bound on the number of clusters.
+
+\begin{lemma}[Stratified isolation]\label{lem:stratiso}
+Let $d\ge6$ and let $f(x)=\inn vx+c+\sum_{c=1}^{m'}P_c(\inn{u_c}x)$ with $P_c(s)=\sum_{k\in c}\alpha_k\relu(s-t_k)$, all thresholds in $[\tau_0,t^\ast]$, where $\tau_0:=2\sqrt{8\log(m'n)/d}$, and suppose the poles satisfy $|\inn{u_c}{u_{c'}}|\le\tau_0/(2t^\ast)$ pairwise. Write $\beta_c=\inn v{u_c}$ and $A_c(s)=\sum_{k\in c:\,t_k<s}\alpha_k$. Then for every cluster $c$ and every $s\in(\tau_0,t^\ast]$ off the thresholds of $c$,
+\[
+|\beta_c+A_c(s)|\,\sqrt{1-s^2}\ \le\ \Lip_{\Sd}(f).
+\]
+\end{lemma}
+\begin{proof}[Proof]
+Fix $c$ and $s$. Let $v^{(c)}_\perp:=v-\beta_cu_c$ and let $w$ be uniform on the unit sphere of $u_c^\perp\cap(v^{(c)}_\perp)^\perp$, a sphere of dimension $D-1\ge d-3$. Set $x=su_c+\sqrt{1-s^2}\,w$ and $\tau=\sqrt{1-s^2}\,u_c-sw$; as in Lemma~\ref{lem:staticrig}, $\tau$ is a unit tangent at $x$, and expanding the gradient,
+\[
+\inn{\nabla f(x)}\tau\;=\;(\beta_c+A_c(s))\sqrt{1-s^2}\;+\;\sum_{c'\ne c}A_{c'}(s_{c'})\,\inn{u_{c'}}\tau,\qquad s_{c'}=\inn{u_{c'}}x,
+\]
+the $\inn{v^{(c)}_\perp}w$ term vanishing by the choice of $w$. For fixed $a$ with $\|a\|\le1$, the spherical marginal satisfies $\PP(|\inn aw|\ge t)\le2e^{-(D-2)t^2/2}$ for all $t$; at $t=\tau_0/2$ and $D-2\ge d-4$, a union bound over the $m'-1$ other poles gives, with probability at least $1-2m'(m'n)^{-4/3}>0$, that $|\inn{u_{c'}}w|<\tau_0/2$ for all $c'$ simultaneously. On that event
+\[
+|s_{c'}|\ \le\ s\,|\inn{u_{c'}}{u_c}|+\sqrt{1-s^2}\,|\inn{u_{c'}}w|\ <\ t^\ast\cdot\frac{\tau_0}{2t^\ast}+\frac{\tau_0}2\ =\ \tau_0\ \le\ \min_{k\in c'}t_k,
+\]
+so $A_{c'}(s_{c'})=0$ for every $c'\ne c$: all cross-terms vanish identically. Almost every $w$ also avoids the finitely many kink subspheres, so the event intersected with genericity is nonempty; pick a witness $w$. Then $x$ is generic, $|\inn{\nabla f(x)}\tau|\le\Lip_{\Sd}(f)$, and the display collapses to the claim, whose left side does not depend on $w$.
+\end{proof}
+
+One more piece of the machinery deserves record: an exact, dimension-free bound on the one-sided mass any single cap can carry. It strengthens the occupancy lemma (which, integrated, gives only $\mathrm{Op}/(4\tau_0)$) to an absolute constant, and it is the reason the incidence accounting below carries no factor of $\mathrm{Op}$.
+
+\begin{lemma}[Cap mass]\label{lem:capmass}
+Let $x_1,\dots,x_n$ be i.i.d.\ uniform on $\Sd$ and let $\tau_0\ge C\sqrt{\log(en)/d}$ with $C$ a large absolute constant. Then with probability at least $1-3n^{-2}$,
+\[
+\sup_{\|u\|\le1}\ \sum_{i=1}^n\bigl(\inn u{x_i}-\tau_0\bigr)_+\ \le\ \frac A{\tau_0},
+\]
+with $A$ an absolute constant; and, provided $\lceil1/(4\tau_0^2)\rceil\le n$, the bound is attained up to constants (aiming at a block of that many points gives mass $(1-o(1))/(4\tau_0)$).
+\end{lemma}
+\begin{proof}[Proof]
+For any $v\in\R^n$, $\sum_i(v_i-\tau_0)_+=\max_{S\subseteq[n]}\sum_{i\in S}(v_i-\tau_0)$, so with $z_S:=\sum_{i\in S}x_i$,
+\[
+\sup_{\|u\|\le1}\sum_i(\inn u{x_i}-\tau_0)_+\ =\ \max_{S\subseteq[n]}\Bigl(\sup_{\|u\|\le1}\inn u{z_S}-\tau_0|S|\Bigr)\ =\ \max_{S}\bigl(\|z_S\|-\tau_0|S|\bigr).
+\]
+It therefore suffices to bound $R(N):=\max_{|S|=N}\|z_S\|$ for every $N$. The vectors $\sqrt d\,x_i$ are independent, isotropic and sub-Gaussian with absolute constant, so for fixed $S$ and unit $w$ supported on $S$, $\|\sum_{i\in S}w_ix_i\|^2$ concentrates around $1$ with sub-exponential tail $\exp(-cd\min(s,s^2))$; a quarter-net over $w$ (size $9^N$) and a union over the $\binom nN\le(en/N)^N$ subsets and over $N$ give, with probability $1-2n^{-2}$, simultaneously for all $S$:
+\[
+\|z_S\|^2\ \le\ N\bigl(1+C_0(\sqrt{L_N}+L_N)\bigr),\qquad L_N:=\frac{N\log(en/N)+4\log n}{d}.
+\]
+When $L_N\le1$ this gives $R(N)\le\sqrt{(1+2C_0)N}$ and $\max_N(R(N)-\tau_0N)\le(1+2C_0)/(4\tau_0)$, by maximizing $a\sqrt N-\tau_0N$. When $L_N>1$, $R(N)^2\le3C_0NL_N$, and splitting $\tau_0N$ in half: the term $\sqrt{3C_0/d}\,N\sqrt{\log(en/N)}$ is at most $\tau_0N/2$ once $\tau_0^2\ge12C_0\log(en)/d$, and the remaining $2\sqrt{3C_0\log n/d}\,\sqrt N-\tau_0N/2$ is at most $6C_0\log n/(d\tau_0)=O(\tau_0)$. Adding the two regions proves the upper bound. For attainability, aim $u=z_S/\|z_S\|$ at a random block of $k=\lceil1/(4\tau_0^2)\rceil$ points: $\EE\|z_S\|^2=k$ exactly and $\mathrm{Var}(\|z_S\|^2)\le2k^2/d$, so each block point sits at depth $(1\pm O(\sqrt{k/d}))/\sqrt k$, giving mass $k(1/\sqrt k-\tau_0)(1-o(1))=(1-o(1))/(4\tau_0)$.
+\end{proof}
+
+\begin{remark}[The deterministic slice, and where randomness becomes necessary]\label{rem:detslice}
+Lemma~\ref{lem:capmass} yields a deterministic relaxation of Conjecture~\ref{conj:M} whose optimum can be computed in closed form; we record the outcome in outline, as motivation for where the difficulty lies. Bounding the multiplier sum by $\sum_i|w(x_i)|$ and each merged-ridge value by its slope times depth, the supremum of the deterministic bound over all admissible configurations equals $\Lambda m'\cdot\Phi_{\mathrm{mass}}$ with $\Phi_{\mathrm{mass}}=\Theta(1/\tau_0)$ --- no factor of $\mathrm{Op}$, no logarithm, and the value bound inactive at the optimum. Consequently Conjecture~\ref{conj:M} holds \emph{with no use of label randomness} on the slice $d\le c\,T\log(m'n)/c_0^2$, a nonempty band-top slice; and the same computation certifies sharply that no deterministic argument can go further: the deterministic optimum exceeds the conjectured threshold by exactly $\sqrt{d/(32\,T\log(m'n))}$ above the slice. Label randomness is thus quantitatively necessary for $d\gg T\log n$, and the surviving difficulty is a Rademacher chaining at per-cap $\ell_2$-radius $O(\Lambda)$ against the pole-dictionary entropy --- with the deep sector $s>\sqrt{(1+\nu)/2}$ already closed unconditionally (caps there are pairwise disjoint for $\nu$-incoherent poles, since two caps sharing a point force $\inn{u_g}{u_h}\ge2s^2-1$).
+\end{remark}
+
+Above the deterministic slice the deep sector can still be removed unconditionally, at the price of one more elementary lemma, which also quantifies how strongly incoherent caps repel each other in depth.
+
+\begin{lemma}[Forced depth]\label{lem:forceddepth}
+Let $u_1,\dots,u_K\in\Sd$ be pairwise $\nu$-incoherent and let $x\in\Sd$ satisfy $\inn{u_g}x\ge\sigma>0$ for all $g$. Then $K\sigma\le\|\sum_gu_g\|\le\sqrt{K(1+(K-1)\nu)}$, so $\sigma\le\sqrt{1/K+\nu}$; equivalently, at any point, at most $(1-\nu)/(\sigma^2-\nu)$ incoherent caps can be simultaneously at depth $\sigma$, provided $\sigma^2>\nu$.
+\end{lemma}
+\begin{proof}[Proof]
+By Cauchy--Schwarz on the unit vector $x$, $K\sigma\le\sum_g\inn{u_g}x=\inn{\textstyle\sum_gu_g}{x}\le\|\sum_gu_g\|$, while $\|\sum_gu_g\|^2=K+\sum_{g\ne h}\inn{u_g}{u_h}\le K\bigl(1+(K-1)\nu\bigr)$ by incoherence. Squaring the first bound and dividing by $K$, $K\sigma^2\le1+(K-1)\nu$, which is $\sigma^2\le1/K+\nu$; rearranged, $K(\sigma^2-\nu)\le1-\nu$, so $K\le(1-\nu)/(\sigma^2-\nu)$ when $\sigma^2>\nu$.
+\end{proof}
+
+\begin{lemma}[Deep peel]\label{lem:deeppeel}
+In the setting of Conjecture~\ref{conj:M} with merged ridges of slope at most $\Lambda$ anchored at $\tau_0$, split each profile in height at $h_0:=\Lambda\delta^\ast$ with $\delta^\ast:=32A\Lambda m'/(\eps n)$, and let $w_2$ collect the parts above $h_0$. If $\delta^\ast\ge\tau_0$ --- which is exactly the complement $d\gtrsim T\log(m'n)/c_0^2$ of the deterministic slice --- then, deterministically in the labels and uniformly over admissible configurations,
+\[
+\sum_i|w_2(x_i)|\ \le\ m'\,\Lambda\,\frac A{\delta^\ast}\ =\ \frac{\eps n}{32}.
+\]
+\end{lemma}
+\begin{proof}[Proof]
+$|T_g(s)|>h_0$ forces $s>\tau_0+\delta^\ast$ and there $|T_g^{\mathrm{hi}}(s)|\le\Lambda(s-\tau_0-\delta^\ast)_+$; apply Lemma~\ref{lem:capmass} at threshold $\tau_0+\delta^\ast$ and sum over the $m'$ ridges.
+\end{proof}
+
+The residual after the peel is the shallow sector: ridges of uniform height at most $h_0=\Theta(c_0^2\eps)$. When the data caps are pairwise disjoint its multiplier sum is at most $h_0n\le\eps n/32$ pointwise --- closed with no randomness. In general the caps genuinely overlap (two $\nu$-incoherent caps can legally share $\asymp1/(2\tau_0^2)$ data points, so no disjointness lemma exists), and every label-independent bound --- incidence counts, solo/overlap splits, the $\ell_1$ optimum --- is provably vacuous above the deterministic slice. The extremal legal configuration is the \emph{disjoint aligned} one: partitioning each sign class into blocks of size $k$ and aiming one slope-limited cap at each block achieves, for every $y$,
+\[
+\Phi_{\mathrm{disj}}\;=\;\max_{2\le k\le n/m'}\ m'k\cdot\min\bigl(h_0,\ \Lambda(k^{-1/2}-\tau_0)_+\bigr)\;=\;\Theta(h_0n),
+\]
+flat in $m'$, with pole coherences a constant fraction of the budget; this pins the admissible Lipschitz fraction at exactly $c_0\le1/32$ and shows the height ceiling is inactive at the optimum --- the operative constraint is the incoherence budget $\nu=\Theta(\sqrt{\log(m'n)/d})$, which shrinks with the dimension. Below $d\asymp T\log(m'n)$ the deterministic bound is tight and the label average buys nothing; above it, the surviving statement --- to which the log-free law in the band is now reduced, for every Lipschitz activation --- is the matching upper bound
+\[
+\EE_y\ \sup\ \inn y{w_1}\ \le\ C\,\Phi_{\mathrm{disj}}+CB\sqrt{n\log(m'n)}:
+\]
+that incoherence throttles the overlap gain of aimed caps to a constant multiple of the disjoint optimum. This display is the shallow-sector form of Conjecture~\ref{conj:M} and is used nowhere else in the paper. In simulation the strongest admissible adversary tracks $\Phi_{\mathrm{disj}}$ and the incremental gain from overlapping arrangements vanishes as $d$ grows; no admissible configuration approaches the deterministic ceiling without violating the coherence budget several times over.
+
+\begin{remark}[Per-cluster rigidity fails below the coherence floor]\label{rem:rigidfail}
+The incoherence hypothesis in Lemma~\ref{lem:stratiso} is necessary in a strong sense. For any pole separation $\rho\in(0,t^\ast)$, take two clusters at separation $\rho$ carrying the same $N=\lfloor t^\ast/(2\rho)\rfloor$ thresholds, evenly spaced in $[0,t^\ast]$, with weights $+\alpha_0$ in one cluster and $-\alpha_0$ in the other. The threshold spacing exceeds the argument gap $|\inn{u_1-u_2}x|\le\rho$, so the two crossing counts differ by at most one, and the gradient $\alpha_0(n_1u_1-n_2u_2)$ has norm at most $\alpha_0(n_2\rho+1)\le\tfrac32\alpha_0$: the network is $2\alpha_0$-Lipschitz. Yet each cluster's profile ramps to $N\alpha_0$, so $\mathrm{TV}(P_c)\ge\alpha_0t^{\ast2}/(4\rho)$: per-cluster rigidity degrades linearly in $1/\rho$, and no polylogarithmic bound can hold for coherent clusters. (Numerically the ratio doubles as $\rho$ halves, with the Lipschitz constant flat.) The remedy is structural rather than analytic: clusters below the coherence floor must be merged and their \emph{total} profile bounded --- the merged profile of this very example has total variation $\le\pi L$ by the argument of Lemma~\ref{lem:staticrig} --- and the isolation lemma then applies between the merged groups.
+\end{remark}
+
+\begin{thebibliography}{9}
+
+\bibitem{BLN}
+S.~Bubeck, Y.~Li, and D.~M.~Nagaraj.
+\newblock A law of robustness for two-layers neural networks.
+\newblock In \emph{Proceedings of the 34th Conference on Learning Theory}, Proceedings of Machine Learning Research, vol.~134, pp.~804--820, PMLR, 2021. arXiv:2009.14444.
+
+\bibitem{paper}
+Y.~Shmalo.
+\newblock A law of robustness for two-layer neural networks with arbitrary weights.
+\newblock 2026. The main paper accompanying this note.
+
+\bibitem{Vershynin}
+R.~Vershynin.
+\newblock \emph{High-Dimensional Probability: An Introduction with Applications in Data Science}.
+\newblock Cambridge Series in Statistical and Probabilistic Mathematics, vol.~47, Cambridge University Press, Cambridge, 2018. DOI: 10.1017/9781108231596.
+
+\end{thebibliography}
+
+\end{document}
