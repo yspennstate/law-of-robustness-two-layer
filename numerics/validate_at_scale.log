@@ -1,0 +1,40 @@
+=== (A) rigidity at scale: check max|alpha_j| <= 2*Lip_hat ===
+                  case    d    m   m0   Lip_hat  max|a|/2L  PASS
+               generic   20   40   40      6.99     0.1866  True
+               generic   20   40   40      8.72     0.2171  True
+               generic   20   40   40      6.67     0.2129  True
+               generic   20   40   40      6.43     0.2264  True
+               generic   30   60   60      6.73     0.1662  True
+               generic   30   60   60      8.25     0.1421  True
+               generic   30   60   60      9.21     0.1959  True
+               generic   30   60   60      7.39     0.2335  True
+               generic   40   80   80      8.34     0.1426  True
+               generic   40   80   80      8.45     0.1405  True
+               generic   40   80   80      6.56     0.2216  True
+               generic   40   80   80      8.04     0.1565  True
+          plant-cancel   20   40   39      6.83     0.1434  True
+          plant-cancel   20   40   39      6.66     0.1897  True
+          plant-cancel   20   40   39      6.03     0.1804  True
+          plant-cancel   20   40   39      7.64     0.1788  True
+          plant-cancel   40   80   79      7.63     0.2020  True
+          plant-cancel   40   80   79      6.57     0.1765  True
+          plant-cancel   40   80   79      7.53     0.1753  True
+          plant-cancel   40   80   79      6.16     0.2371  True
+         near-parallel   20   40   40     1e+04     0.5000  True
+         near-parallel   20   40   40     1e+04     0.5000  True
+         near-parallel   20   40   40     1e+04     0.4999  True
+         near-parallel   20   40   40     1e+04     0.5000  True
+         near-parallel   40   80   80     1e+04     0.4998  True
+         near-parallel   40   80   80     1e+04     0.4999  True
+         near-parallel   40   80   80     1e+04     0.5000  True
+         near-parallel   40   80   80     1e+04     0.5000  True
+(A) ALL PASS
+
+=== (B) matching upper bound: exact interp, disjoint caps, Lip=sqrt(7) ===
+     n      d  rho_max  interp_err  disjoint Lip(analytic)
+   500   2486    0.090    3.11e-15      True         2.646
+  1000   2764    0.096    3.55e-15      True         2.646
+  2000   3041    0.086    3.11e-15      True         2.646
+(B) ALL PASS
+
+SUMMARY: BOTH PASS
